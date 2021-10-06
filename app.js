@@ -19,11 +19,12 @@ app.use('/api/v1/user', userR);
 
 // DB Connect
 
-mongoose.connect(process.env.DB_URI, {
-    useNewUrlParser: true
-}, ()=>{
-    console.log("Connected to DB.");
-})
+mongoose.connect('mongodb://localhost:27017/', {
+    dbName: 'kantine',
+    useNewUrlParser: true,
+    useUnifiedTopology: true 
+}, err => err ? console.log(err) : console.log('Connected to database'));
+
 
 // Server
 
