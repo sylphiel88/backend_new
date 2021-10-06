@@ -19,7 +19,7 @@ app.use('/api/v1/user', userR);
 
 // DB Connect
 
-mongoose.connect('mongodb://localhost:27017/', {
+mongoose.connect(process.env.DB_URI, {
     dbName: 'kantine',
     useNewUrlParser: true,
     useUnifiedTopology: true 
