@@ -7,7 +7,6 @@ router.get("/",(req, res)=>{
 }); 
 
 router.post("/signin",async (req,res)=>{
-    const mongoose = require('mongoose')
     const User = require('../models/user.model')
     const vUser=await User.findOne({username: req.body.username}).exec()
     console.log(vUser);
@@ -21,9 +20,20 @@ router.post("/signin",async (req,res)=>{
     
 })
 
-router.post("/signup",(req,res)=>{
-    res.json({message: "Erfolgreicher Signup von "+req.body.username})
+router.post("/signup",async(req,res)=>{
+    const User = require('../models/user.model')
+    const vUser = new User({
+        username: req.body.username,
+        password: req.body.password,
+        email: req.body.password
+    })
+    
+    vUser.save()
 })
 
+
+const handleError = (err,res) => {
+    res.json({message: "Fehler: "+err})
+}
 
 module.exports = router;

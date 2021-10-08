@@ -39,6 +39,10 @@ const UserSchema = mongoose.Schema({
     },
     resetToken: {
         type: String,
+    },
+    userGroup: {
+        type: String,
+        default: "doz"
     }
 });
 
