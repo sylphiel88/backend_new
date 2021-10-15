@@ -70,7 +70,6 @@ router.get("/isLoggedIn", verifyJWT, (req, res) => {
 })
 
 router.get("/usergroup", async (req, res) => {
-    var ObjectId = (require('mongoose').Types.ObjectId);
     const UserGroup = require('../models/usergroup.model')
     const user = req.headers.user
     try {
@@ -89,4 +88,23 @@ router.get("/usergroup", async (req, res) => {
         console.log(e);
     }
 })
+
+router.get("/notactivatedusers", async(req,res) => {
+    let page=req.query.page
+    let perPage=req.query.perPage
+    const naUsers = await User.find({ isActivated: false }).skip((page-1)*perPage).limit(9).exec()
+    try {
+        res.json(naUsers)
+    } catch (error) {
+        
+    }
+})
+
+router.get("/getCountUsers",async(req,res)=> {
+    let perPage=req.query.perPage
+    let pages = await User.count('username')
+    pages = Math.floor(pages/perPage)+1
+    res.json({pages: pages})
+})
+
 module.exports = router;
