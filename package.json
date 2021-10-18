@@ -19,6 +19,8 @@
     "jwt-decode": "^3.1.2",
     "mongodb": "^4.1.2",
     "mongoose": "^6.0.9",
-    "node-jsonwebtoken": "^0.0.1"
+    "node-jsonwebtoken": "^0.0.1",
+    "socket.io": "^4.3.1",
+    "socketio": "^1.0.0"
   }
 }

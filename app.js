@@ -5,6 +5,8 @@ const app = express();
 require('dotenv').config();
 const mongoose = require('mongoose');
 const cors = require('cors');
+const User = require('./models/user.model')
+
 
 app.use(express.json());
 app.use(cors());
@@ -25,6 +27,19 @@ mongoose.connect(process.env.DB_URI, {
     useUnifiedTopology: true 
 }, err => err ? console.log(err) : console.log('Connected to database'));
 
+var watchMongodb = function () {
+    const io = require('socket.io')
+    var socket = io()
+    const changeStream = User.watch();
+    changeStream.on('change', next=>{
+        socket.emit("dbchange")
+    });
+};
+
+mongoose.connection.on('connected', () => {
+    console.log('Connected to mongo instance');
+    watchMongodb();
+});
 
 // Server
 

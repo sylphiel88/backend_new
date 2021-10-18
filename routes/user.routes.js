@@ -14,7 +14,7 @@ router.post("/signin", async (req, res) => {
     if (vUser.isActivated) {
         if (bool) {
             const un = vUser.username
-            jwt.sign({ user: un }, process.env.ACCESS_TOKEN_SECRET, { expiresIn: '5m' }, (err, token) => {
+            jwt.sign({ user: un }, process.env.ACCESS_TOKEN_SECRET, {}, (err, token) => {
                 res.json({
                     authorization: token,
                     message: "Erfolgreicher SignIn von " + req.body.username
@@ -43,6 +43,12 @@ router.post("/signup", async (req, res) => {
     }
 })
 
+router.post("/activateUser", async(req,res)=> {
+    let un = req.body.username;
+    await User.updateOne({username: un}, {isActivated: true}).exec()
+    res.json({msg: "erfolg"})
+})
+
 const verifyJWT = (req, res) => {
     const token = req.headers.authorization
     if (token === undefined) {
@@ -63,7 +69,6 @@ const verifyJWT = (req, res) => {
 
 
 router.get("/isLoggedIn", verifyJWT, (req, res) => {
-    console.log("hallo");
     const token = req.headers.authorization
     const un = jwtd(token, process.env.ACCESS_TOKEN_SECRET)
     console.log(res)
@@ -90,21 +95,16 @@ router.get("/usergroup", async (req, res) => {
 })
 
 router.get("/notactivatedusers", async(req,res) => {
-    let page=req.query.page
-    let perPage=req.query.perPage
-    const naUsers = await User.find({ isActivated: false }).skip((page-1)*perPage).limit(9).exec()
-    try {
-        res.json(naUsers)
-    } catch (error) {
-        
-    }
+    let page=parseInt(req.query.page)
+    let perPage=parseInt(req.query.perPage)
+    const naUsers = await User.find({ isActivated: false }).limit(perPage).skip((page-1)*perPage)
+    res.json(naUsers)
 })
 
 router.get("/getCountUsers",async(req,res)=> {
     let perPage=req.query.perPage
-    let pages = await User.count('username')
-    pages = Math.floor(pages/perPage)+1
-    res.json({pages: pages})
+    let results = await User.count({ isActivated: false }).then(results => gotPages = Math.floor((results-1)/perPage)+1)
+    res.json({pages: gotPages, userCount: results})
 })
 
 module.exports = router;
