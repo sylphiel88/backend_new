@@ -97,7 +97,7 @@ router.get("/usergroup", async (req, res) => {
 router.get("/notactivatedusers", async(req,res) => {
     let page=parseInt(req.query.page)
     let perPage=parseInt(req.query.perPage)
-    const naUsers = await User.find({ isActivated: false }).limit(perPage).skip((page-1)*perPage)
+    const naUsers = await User.find({ isActivated: false }).limit(perPage).skip((page-1)*perPage).sort({username: 1});
     res.json(naUsers)
 })
 

@@ -5,7 +5,7 @@ const router = express.Router();
 
 router.get("/", async (req, res)=>{
     try {
-        const menu = await Menu.find().limit(5);
+        const menu = await Menu.find().limit(5).sort({date: 1}).exec();
         res.json(menu)
     } catch(err) {
         res.json({ message: err });
