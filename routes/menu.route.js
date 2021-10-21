@@ -30,9 +30,14 @@ router.post("/", async (req,res)=>{
     }
 });
 
-router.post("/vk", async(req,res)=>{
-    console.log(req.body.date)
-    await Menu.updateOne({menu:[{soupvk: req.body.soup}]},{menu:[{mainvk: req.body.vk}]}).exec();
+router.post("/update", async(req,res)=>{
+    const vk = req.body.vk
+    const vg = req.body.vg
+    const date=req.body.date
+    const svk=req.body.svk
+    const svg=req.body.svg
+    const dessert=req.body.dessert
+    await Menu.updateOne({date: date},{date:date, menu:{mainvk: vk, mainv:vg, soupvk:svk, soupv:svg, dessert:dessert}}).exec();
     res.json({msg: "update erfolgreich"})
 })
 
