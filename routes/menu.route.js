@@ -30,4 +30,10 @@ router.post("/", async (req,res)=>{
     }
 });
 
+router.post("/vk", async(req,res)=>{
+    console.log(req.body.date)
+    await Menu.updateOne({menu:[{soupvk: req.body.soup}]},{menu:[{mainvk: req.body.vk}]}).exec();
+    res.json({msg: "update erfolgreich"})
+})
+
 module.exports = router;
