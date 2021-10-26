@@ -89,10 +89,22 @@ const verifyJWT = (req, res) => {
 }
 
 
-router.get("/isLoggedIn", verifyJWT, (req, res) => {
+router.get("/isLoggedIn", (req, res) => {
     const token = req.headers.authorization
-    const un = jwtd(token, process.env.ACCESS_TOKEN_SECRET)
-    console.log(res)
+    if (token === undefined) {
+        res.json({ login: false, exp: false, msg: "Token fehlt!  " })
+    } else {
+        jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, (err, decoded) => {
+            if (err) {
+                if (err instanceof jwt.TokenExpiredError) {
+                    res.json({ login: false, exp: true, dec: "" })
+                }
+                res.json({ login: false, exp: false, dec: "" })
+            } else {
+                res.json({ login: true, exp: false, dec: decoded.user })
+            }
+        })
+    }
 })
 
 router.get("/usergroup", async (req, res) => {
