@@ -4,6 +4,10 @@ const router = express.Router();
 const jwt = require('node-jsonwebtoken')
 const jwtd = require('jwt-decode')
 const UserGroup = require('../models/usergroup.model');
+const fs = require('fs')
+const path = require('path');
+const upload = require('../middleware/upload');
+const { send } = require("process");
 
 router.get("/", (req, res) => {
     res.send("We are the Users!");
@@ -164,5 +168,28 @@ router.get("/getCountUsers", async (req, res) => {
     }
     res.json({ pages: gotPages, userCount: results })
 })
+
+router.get("/getProfilePic", (req, res) => {
+    const un = req.query.username;
+    User.findOne({ username: un }, 'hasImg img', function (err, img) {
+        if (err)
+            res.json(err)
+        if (img.hasImg) {
+            res.contentType('json');
+            res.send(img);
+        } else {
+            res.json({ noPic: true })
+        }
+    })
+})
+
+router.post('/uploadProfilepic', upload.single('filename'), async (req, res, next) => {
+    console.log(req);
+    const cont = 'image/jpg';
+    const data = fs.readFileSync('./uploads/' + req.file.filename)
+    const un = req.body.username;
+    const resu = await User.updateOne({ username: un }, { img: { data: data, contentType: cont }, hasImg: true })
+    res.json({ msg: "Hurra", res: resu })
+});
 
 module.exports = router;
