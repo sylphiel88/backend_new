@@ -16,8 +16,10 @@ app.use(cors());
 
         const menuR = require('./routes/menu.route');
         const userR = require('./routes/user.routes');
+        const classesR = require('./routes/classes.routes')
         app.use('/api/v1/menu', menuR);
         app.use('/api/v1/user', userR);
+        app.use('/api/v1/class', classesR);
 
         // DB Connect
 

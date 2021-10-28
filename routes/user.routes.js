@@ -1,13 +1,11 @@
 const express = require("express");
-const User = require('../models/user.model')
 const router = express.Router();
+const User = require('../models/user.model')
 const jwt = require('node-jsonwebtoken')
-const jwtd = require('jwt-decode')
-const UserGroup = require('../models/usergroup.model');
 const fs = require('fs')
-const path = require('path');
 const upload = require('../middleware/upload');
-const { send } = require("process");
+const Dozent = require('../models/dozent.model');
+const Classes = require("../models/classes.model");
 
 router.get("/", (req, res) => {
     res.send("We are the Users!");
@@ -47,11 +45,17 @@ router.post("/signup", async (req, res) => {
         const vUser = new User({
             username: req.body.username,
             password: req.body.password,
-            email: req.body.email
+            email: req.body.email,
+            userGroup: req.body.usergr
         })
         try {
             await vUser.save()
                 .then(res.json({ message: "Erfolgreich Registriert!" }))
+            if (vUser.userGroup == "doz") {
+                const newDoz = new Dozent({})
+                newDoz.userId = vUser
+                await newDoz.save()
+            }
         } catch (e) {
             res.json({ message: e })
         }
@@ -111,7 +115,7 @@ router.get("/isLoggedIn", (req, res) => {
     }
 })
 
-router.get("/usergroup", async (req, res) => {
+router.get("/getUserData", async (req, res) => {
     const UserGroup = require('../models/usergroup.model')
     const user = req.headers.user
     try {
@@ -119,11 +123,31 @@ router.get("/usergroup", async (req, res) => {
             const fUser = await User.findOne({ username: user }).exec()
             const userGroup = await UserGroup.findOne({ groupshort: fUser.userGroup }).exec()
             res.json({
-                ug: userGroup.grouplong
+                ug: userGroup.grouplong,
+                email: fUser.email
             })
         } else {
             res.json({
-                ug: ""
+                ug: "",
+                email: ""
+            })
+        }
+    } catch (e) {
+        console.log(e);
+    }
+})
+
+router.get("/getEmail", async (req, res) => {
+    const user = req.headers.user
+    try {
+        if (user != "") {
+            const email = await User.findOne({ username: user }, 'email').exec()
+            res.json({
+                email: email
+            })
+        } else {
+            res.json({
+                email: ""
             })
         }
     } catch (e) {
@@ -136,7 +160,6 @@ router.get("/notactivatedusers", async (req, res) => {
     const perPage = parseInt(req.query.perPage)
     const search = req.query.search;
     let naUsers;
-    console.log(perPage, page, search)
     try {
         if (search != "") {
             const unquery = new RegExp(search, 'i')
@@ -184,7 +207,6 @@ router.get("/getProfilePic", (req, res) => {
 })
 
 router.post('/uploadProfilepic', upload.single('filename'), async (req, res, next) => {
-    console.log(req);
     const cont = 'image/jpg';
     const data = fs.readFileSync('./uploads/' + req.file.filename)
     const un = req.body.username;
@@ -192,4 +214,26 @@ router.post('/uploadProfilepic', upload.single('filename'), async (req, res, nex
     res.json({ msg: "Hurra", res: resu })
 });
 
+router.get('/deleteProfilepic', async (req, res) => {
+    await User.updateOne({ username: req.query.username }, { img: { data: "", contentType: "" }, hasImg: false })
+    res.json({ msg: "hurra" })
+})
+
+router.post('/addClassToDoz', async (req, res) => {
+    const dozId = req.body.dozId
+    const classId = req.body.classId
+    const fUser = await User.findById(dozId).exec()
+    const fclass = await Classes.findById(classId).exec()
+    const fDoz = await Dozent.findOne({ userId: fUser }).exec()
+    console.log(fclass, fDoz, fUser);
+    fDoz.classes.push(fclass)
+    await fDoz.save()
+    res.json({ class: fDoz.class })
+})
+
+
+router.get('/getAllDocents', async (req, res) => {
+    const dozenten = await Dozent.find({nameShort: 'ST'}).populate([{ path: 'classes', model: 'classes', populate: [{ path: 'city', model: 'city' }, { path: 'department', model: 'department' }] }, { path: 'userId', model: 'user' }]).where('dozenten.classes.department.nameShort').equals('ST').exec()
+    res.json({ dozenten: dozenten})
+})
 module.exports = router;
