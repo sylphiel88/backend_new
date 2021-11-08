@@ -6,6 +6,7 @@ const fs = require('fs')
 const upload = require('../middleware/upload');
 const Dozent = require('../models/dozent.model');
 const Classes = require("../models/classes.model");
+const Department = require("../models/department.model")
 
 router.get("/", (req, res) => {
     res.send("We are the Users!");
@@ -52,7 +53,9 @@ router.post("/signup", async (req, res) => {
             await vUser.save()
                 .then(res.json({ message: "Erfolgreich Registriert!" }))
             if (vUser.userGroup == "doz") {
-                const newDoz = new Dozent({})
+                var depId = await Department.findOne({nameLong:req.body.dep},'_id').exec()
+                depId = depId._id
+                const newDoz = new Dozent({departments:[depId]})
                 newDoz.userId = vUser
                 await newDoz.save()
             }
