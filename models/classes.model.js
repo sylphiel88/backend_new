@@ -16,6 +16,10 @@ const ClassesSchema = mongoose.Schema({
     num: {
         type: Number,
         default: 1
+    },
+    part: {
+        type: Number,
+        default: 1
     }
 });
 

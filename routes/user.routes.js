@@ -228,7 +228,6 @@ router.post('/addClassToDoz', async (req, res) => {
     const fUser = await User.findById(dozId).exec()
     const fclass = await Classes.findById(classId).exec()
     const fDoz = await Dozent.findOne({ userId: fUser }).exec()
-    console.log(fclass, fDoz, fUser);
     fDoz.classes.push(fclass)
     await fDoz.save()
     res.json({ class: fDoz.class })
